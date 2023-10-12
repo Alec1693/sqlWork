@@ -1,0 +1,24 @@
+CREATE TABLE pdpm_data (
+	provider_number CHAR(20), 
+    provider_name CHAR(255),
+    county_name CHAR(20),
+    state_code CHAR(2),
+    variable_name CHAR(255),
+    facility_value DECIMAL,
+    county_value DECIMAL,
+    state_value VARCHAR(255),
+    national_value VARCHAR(255)
+);
+/*Total_Days Insert  */
+INSERT INTO pdpm_data (provider_number, provider_name, county_name, state_code, variable_name, facility_value)
+SELECT provider_info.provider_number, provider_info.provider_name, provider_info.county_name, provider_info.state_code, 'Total Days' AS variable_name, pdpm.total_days AS facility_value
+FROM provider_info
+INNER JOIN pdpm on provider_info.provider_number = pdpm.provider_number;
+
+INSERT INTO pdpm_data (provider_number, provider_name, county_name, state_code, variable_name, facility_value)
+SELECT provider_info.provider_number, provider_info.provider_name, provider_info.county_name, provider_info.state_code, 'Weighted Facility Cost' AS variable_name, pdpm.facility_cost AS facility_value
+FROM provider_info
+INNER JOIN pdpm on provider_info.provider_number = pdpm.provider_number;
+
+/*SELECT COUNTY TOTAL DAYS*/
+SELECT provider_name, county_name, SUM(facility_value) OVER (PARTITION BY county_name) AS county_value, SUM(facility_value) OVER (PARTITION BY state_code) AS state_value FROM pdpm_data WHERE variable_name = 'Total Days';
